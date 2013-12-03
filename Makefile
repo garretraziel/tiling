@@ -2,7 +2,7 @@ CXX=clang++
 CXXFLAGS=-Wall -Wextra -pedantic -g
 TARGET=tiling
 
-SRC=tiling.cpp neuron.cpp testset.cpp
+SRC=tiling.cpp neuron.cpp testset.cpp constant.cpp
 OBJS=$(SRC:.cpp=.o)
 MAIN=$(TARGET)
 

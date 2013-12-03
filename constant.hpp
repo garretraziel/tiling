@@ -2,6 +2,7 @@
 #define __CONSTANT_HPP__
 
 #include "entity.hpp"
+#include "testset.hpp"
 #include <vector>
 
 class Constant;
@@ -17,6 +18,15 @@ public:
     val_t val() {return priv_value;}
 private:
     val_t priv_value;
+};
+
+class Inputs {
+public:
+    Inputs(int length);
+    ~Inputs();
+
+    bool set_values(InputVector values);
+    PConstantVector input_vector;
 };
 
 #endif

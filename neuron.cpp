@@ -10,9 +10,7 @@ val_t Neuron::val() {
     val_t sum = 0;
     for (it = weights.begin(); it != weights.end(); it++) {
         sum += it->first->val() * it->second;
-        std::cout << it->first->val() << "*" << it->second << std::endl;
     }
-    std::cout << "sum: " << sum << std::endl;
     return act_func(sum);
 }
 
@@ -29,6 +27,12 @@ double Neuron::set_learn_const(double lc) {
     return r;
 }
 
+int Neuron::set_iterations(int it) {
+    int r = iterations;
+    iterations = it;
+    return r;
+}
+
 void Neuron::print_weights() {
     WeightMap::iterator it;
     std::cout << "weights:";
@@ -36,4 +40,26 @@ void Neuron::print_weights() {
         std::cout << " " << it->second;
     }
     std::cout << std::endl;
+}
+
+bool Neuron::learn(TestSet testset, Inputs &inputs) {
+    bool learned = false;
+    int count = 0;
+    while (!learned && count != iterations) {
+        learned = true;
+
+        TestSetVector::iterator it;
+        for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
+            inputs.set_values(it->inputs);
+
+            if (this->val() != it->type) {
+                learned = false;
+                change_weight(it->type);
+                print_weights();
+            }
+        }
+        
+        count++;
+    }
+    return true;
 }
