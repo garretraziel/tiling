@@ -2,6 +2,11 @@
 #define __CONSTANT_HPP__
 
 #include "entity.hpp"
+#include <vector>
+
+class Constant;
+
+typedef std::vector<Constant*> PConstantVector;
 
 class Constant : public Entity {
 public:

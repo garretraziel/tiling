@@ -1,5 +1,5 @@
-CXX=g++
-CXXFLAGS=-Wall -Wextra -pedantic
+CXX=clang++
+CXXFLAGS=-Wall -Wextra -pedantic -g
 TARGET=tiling
 
 SRC=tiling.cpp neuron.cpp testset.cpp

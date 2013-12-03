@@ -16,10 +16,11 @@ typedef std::vector<TestSetStruct> TestSetVector;
 
 class TestSet {
 public:
-    TestSet() {}
+    TestSet():input_length(0) {}
     TestSet(std::string filename);
 
     bool read_testset(std::string filename);
+    int input_length;
     
     TestSetVector tests;
 };
