@@ -61,5 +61,5 @@ bool Neuron::learn(TestSet testset, Inputs &inputs) {
         
         count++;
     }
-    return true;
+    return learned;
 }

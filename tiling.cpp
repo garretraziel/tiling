@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
     
     TestSet testset(argv[1]);
     WeightMap weights;
-    
     Inputs inputs(testset.input_length);
 
     PConstantVector::iterator pit;
@@ -23,9 +22,7 @@ int main(int argc, char *argv[]) {
     weights[bias] = 1;
 
     Neuron n(weights);
-
     n.learn(testset, inputs);
-    
     n.print_weights();
 
     delete bias;
