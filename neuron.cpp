@@ -24,6 +24,7 @@ Neuron::Neuron(EntityVector entities):
     EntityVector::iterator it;
     for (it = entities.begin(); it != entities.end(); it++) {
         weights[*it] = ((double) rand())/RAND_MAX;
+        //weights[*it] = 0;
     }
     bias = new Constant(1);
     weights[bias] = ((double) rand())/RAND_MAX;
@@ -38,10 +39,11 @@ val_t Neuron::val() {
     return act_func(sum);
 }
 
-void Neuron::change_weight(int add) {
+void Neuron::change_weight(TestSetStruct sample, Inputs &inputs) {
+    inputs.set_values(sample.inputs);
     WeightMap::iterator it;
     for (it = weights.begin(); it != weights.end(); it++) {
-        weights[it->first] += it->first->val()*add*2*learn_const;
+        weights[it->first] += it->first->val()*sample.type*2*learn_const;
     }
 }
 
@@ -71,8 +73,8 @@ bool Neuron::check(TestSetStruct test, Inputs &inputs) {
     return this->val() == test.type;
 }
 
-int Neuron::check_all(TestSet testset, Inputs &inputs) {
-    int count = 0;
+unsigned int Neuron::check_all(TestSet testset, Inputs &inputs) {
+    unsigned int count = 0;
     TestSetVector::iterator it;
     for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
         if (check(*it, inputs)) count++;
@@ -82,39 +84,40 @@ int Neuron::check_all(TestSet testset, Inputs &inputs) {
 
 bool Neuron::learn(TestSet testset, Inputs &inputs) {
     int k = 1;
-    int best_length = 0;
-    int current_length = 0;
+    unsigned int best_length = 0;
+    unsigned int current_length = 0;
     WeightMap pocket = weights;
+    unsigned int correct = check_all(testset, inputs);
 
     while (k < iterations) {
-        TestSetStruct sample = testset.tests[rand()%testset.input_length];
+        TestSetStruct sample = testset.tests[rand()%testset.tests.size()];
 
         if (check(sample, inputs)) {
             current_length++;
         } else {
-            
+            unsigned int actual_correct = check_all(testset, inputs);
+            if ((best_length < current_length) && (correct < actual_correct)) {
+                best_length = current_length;
+                correct = actual_correct;
+                pocket = weights;
+            }
+            change_weight(sample, inputs);
+            current_length = 0;
         }
         
         k++;
     }
 
-    return true;
-    
-    // bool learned = false;
-    // int count = 0;
-    // while (!learned && count != iterations) {
-    //     learned = true;
+    if ((best_length < current_length) && (correct < check_all(testset, inputs))) {
+        pocket = weights;
+    }
 
-    //     TestSetVector::iterator it;
-    //     for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
-    //         if (!check(it->inputs, it->type, inputs)) {
-    //             learned = false;
-    //             change_weight(it->type);
-    //             print_weights();
-    //         }
-    //     }
-        
-    //     count++;
-    // }
-    // return learned;
+    weights = pocket;
+
+    TestSetVector::iterator it;
+    for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
+        std::cout << (check(*it, inputs)?1:0) << std::endl;
+    }
+
+    return check_all(testset, inputs) == testset.tests.size();
 }
