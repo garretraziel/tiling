@@ -1,8 +1,32 @@
 #include "neuron.hpp"
+#include "constant.hpp"
 #include <iostream>
+#include <cstdlib>
 
 val_t signum(val_t sum) {
     return sum > 0? 1 : -1;
+}
+
+Neuron::Neuron(WeightMap weights):
+    act_func(signum), weights(weights), learn_const(lc_c), iterations(it_c) {
+    bias = new Constant;
+    weights[bias] = ((double) rand())/RAND_MAX;
+}
+
+Neuron::Neuron(val_t (*act_func) (val_t), WeightMap weights):
+    act_func(act_func), weights(weights), learn_const(lc_c), iterations(it_c) {
+    bias = new Constant;
+    weights[bias] = ((double) rand())/RAND_MAX;
+}
+
+Neuron::Neuron(EntityVector entities):
+    act_func(signum), learn_const(lc_c), iterations(it_c) {
+    EntityVector::iterator it;
+    for (it = entities.begin(); it != entities.end(); it++) {
+        weights[*it] = ((double) rand())/RAND_MAX;
+    }
+    bias = new Constant(1);
+    weights[bias] = ((double) rand())/RAND_MAX;
 }
 
 val_t Neuron::val() {
@@ -42,24 +66,55 @@ void Neuron::print_weights() {
     std::cout << std::endl;
 }
 
-bool Neuron::learn(TestSet testset, Inputs &inputs) {
-    bool learned = false;
+bool Neuron::check(TestSetStruct test, Inputs &inputs) {
+    inputs.set_values(test.inputs);
+    return this->val() == test.type;
+}
+
+int Neuron::check_all(TestSet testset, Inputs &inputs) {
     int count = 0;
-    while (!learned && count != iterations) {
-        learned = true;
+    TestSetVector::iterator it;
+    for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
+        if (check(*it, inputs)) count++;
+    }
+    return count;
+}
 
-        TestSetVector::iterator it;
-        for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
-            inputs.set_values(it->inputs);
+bool Neuron::learn(TestSet testset, Inputs &inputs) {
+    int k = 1;
+    int best_length = 0;
+    int current_length = 0;
+    WeightMap pocket = weights;
 
-            if (this->val() != it->type) {
-                learned = false;
-                change_weight(it->type);
-                print_weights();
-            }
+    while (k < iterations) {
+        TestSetStruct sample = testset.tests[rand()%testset.input_length];
+
+        if (check(sample, inputs)) {
+            current_length++;
+        } else {
+            
         }
         
-        count++;
+        k++;
     }
-    return learned;
+
+    return true;
+    
+    // bool learned = false;
+    // int count = 0;
+    // while (!learned && count != iterations) {
+    //     learned = true;
+
+    //     TestSetVector::iterator it;
+    //     for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
+    //         if (!check(it->inputs, it->type, inputs)) {
+    //             learned = false;
+    //             change_weight(it->type);
+    //             print_weights();
+    //         }
+    //     }
+        
+    //     count++;
+    // }
+    // return learned;
 }

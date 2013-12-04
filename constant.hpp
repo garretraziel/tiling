@@ -7,7 +7,7 @@
 
 class Constant;
 
-typedef std::vector<Constant*> PConstantVector;
+typedef std::vector<Constant*> ConstantVector;
 
 class Constant : public Entity {
 public:
@@ -26,7 +26,8 @@ public:
     ~Inputs();
 
     bool set_values(InputVector values);
-    PConstantVector input_vector;
+    ConstantVector input_vector;
+    EntityVector as_entities();
 };
 
 #endif

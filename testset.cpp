@@ -25,8 +25,7 @@ bool TestSet::read_testset(std::string filename) {
             input_length = values.size();
             TestSetStruct testset = {values, type};
             tests.push_back(testset);
-        }
-        
+        }        
     } else {
         std::cerr << "[ERR] File " << filename << " cannot be opened." << std::endl;
         return false;

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "constant.hpp"
 #include "neuron.hpp"
 #include "testset.hpp"
@@ -8,24 +10,16 @@ int main(int argc, char *argv[]) {
         std::cerr << "[ERR] filename argument" << std::endl;
         return 1;
     }
+
+    srand(time(NULL));
     
     TestSet testset(argv[1]);
-    WeightMap weights;
     Inputs inputs(testset.input_length);
+    EntityVector entities(inputs.as_entities());
 
-    PConstantVector::iterator pit;
-    for (pit = inputs.input_vector.begin(); pit != inputs.input_vector.end(); pit++) {
-        weights[*pit] = 1;
-    }
-
-    Constant *bias = new Constant(1);
-    weights[bias] = 1;
-
-    Neuron n(weights);
+    Neuron n(entities);
     n.learn(testset, inputs);
     n.print_weights();
-
-    delete bias;
     
     return 0;
 }

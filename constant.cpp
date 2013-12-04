@@ -8,7 +8,7 @@ Inputs::Inputs(int length) {
 }
 
 Inputs::~Inputs() {
-    PConstantVector::iterator pcit;
+    ConstantVector::iterator pcit;
     for (pcit = input_vector.begin(); pcit != input_vector.end(); pcit++) {
         delete *pcit;
     }
@@ -23,4 +23,13 @@ bool Inputs::set_values(InputVector values) {
         input_vector[i]->set_val(values[i]);
     }
     return true;
+}
+
+EntityVector Inputs::as_entities() {
+    EntityVector entities;
+    ConstantVector::iterator it;
+    for (it = input_vector.begin(); it != input_vector.end(); it++) {
+        entities.push_back(*it);
+    }
+    return entities;
 }

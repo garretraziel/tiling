@@ -9,15 +9,17 @@
 
 typedef std::map<Entity*, double> WeightMap;
 
+const double lc_c = 0.5;
+const int it_c = 1000000;
+
 val_t signum(val_t);
 
 class Neuron : public Entity {
 public:
-    Neuron():act_func(signum), learn_const(0.5), iterations(10000) {}
-    Neuron(WeightMap weights):
-        act_func(signum), weights(weights), learn_const(0.5), iterations(10000) {}
-    Neuron(val_t (*act_func) (val_t), WeightMap weights):
-        act_func(act_func), weights(weights), learn_const(0.5), iterations(10000) {}
+    Neuron(EntityVector entities);
+    Neuron(WeightMap weights);
+    Neuron(val_t (*act_func) (val_t), WeightMap weights);
+    ~Neuron() {delete bias;}
 
     val_t val();
     void change_weight(int add);
@@ -26,10 +28,14 @@ public:
     void print_weights();
     bool learn(TestSet testset, Inputs &inputs);
 private:
+    bool check(TestSetStruct test, Inputs &inputs);
+    int check_all(TestSet testset, Inputs &inputs);
+    
     val_t (*act_func) (val_t);
     WeightMap weights;
     double learn_const;
     int iterations;
+    Constant *bias;
 };
 
 #endif
