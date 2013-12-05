@@ -10,7 +10,7 @@
 typedef std::map<Entity*, double> WeightMap;
 
 const double lc_c = 0.5;
-const int it_c = 1000000;
+const int it_c = 1000;
 
 val_t signum(val_t);
 

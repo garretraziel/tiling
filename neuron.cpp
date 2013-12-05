@@ -63,6 +63,7 @@ void Neuron::print_weights() {
     WeightMap::iterator it;
     std::cout << "weights:";
     for (it = weights.begin(); it != weights.end(); it++) {
+        if (it->first == bias) std::cout << " bias:";
         std::cout << " " << it->second;
     }
     std::cout << std::endl;
