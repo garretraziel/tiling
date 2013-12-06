@@ -1,6 +1,5 @@
 #include "testset.hpp"
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 TestSet::TestSet(std::string filename) {
@@ -27,7 +26,6 @@ bool TestSet::read_testset(std::string filename) {
             tests.push_back(testset);
         }        
     } else {
-        std::cerr << "[ERR] File " << filename << " cannot be opened." << std::endl;
         return false;
     }
     

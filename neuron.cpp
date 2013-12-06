@@ -74,32 +74,32 @@ bool Neuron::check(TestSetStruct test, Inputs &inputs) {
     return this->val() == test.type;
 }
 
-unsigned int Neuron::check_all(TestSet testset, Inputs &inputs) {
+unsigned int Neuron::check_all(TestSetVector testset, Inputs &inputs) {
     unsigned int count = 0;
     TestSetVector::iterator it;
-    for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
-        if (check(*it, inputs)) count++;
+    for (it = testset.begin(); it != testset.end(); it++) {
+        if (!check(*it, inputs)) count++;
     }
     return count;
 }
 
-bool Neuron::learn(TestSet testset, Inputs &inputs) {
+unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
     int k = 1;
     unsigned int best_length = 0;
     unsigned int current_length = 0;
     WeightMap pocket = weights;
-    unsigned int correct = check_all(testset, inputs);
+    unsigned int errors = check_all(testset, inputs);
 
     while (k < iterations) {
-        TestSetStruct sample = testset.tests[rand()%testset.tests.size()];
+        TestSetStruct sample = testset[rand()%testset.size()];
 
         if (check(sample, inputs)) {
             current_length++;
         } else {
-            unsigned int actual_correct = check_all(testset, inputs);
-            if ((best_length < current_length) && (correct < actual_correct)) {
+            unsigned int actual_errors = check_all(testset, inputs);
+            if ((best_length < current_length) && (actual_errors < errors)) {
                 best_length = current_length;
-                correct = actual_correct;
+                errors = actual_errors;
                 pocket = weights;
             }
             change_weight(sample, inputs);
@@ -109,16 +109,11 @@ bool Neuron::learn(TestSet testset, Inputs &inputs) {
         k++;
     }
 
-    if ((best_length < current_length) && (correct < check_all(testset, inputs))) {
+    if ((best_length < current_length) && (check_all(testset, inputs) < errors)) {
         pocket = weights;
     }
 
     weights = pocket;
 
-    TestSetVector::iterator it;
-    for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
-        std::cout << (check(*it, inputs)?1:0) << std::endl;
-    }
-
-    return check_all(testset, inputs) == testset.tests.size();
+    return check_all(testset, inputs);
 }

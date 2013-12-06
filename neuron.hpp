@@ -7,10 +7,13 @@
 #include "testset.hpp"
 #include "constant.hpp"
 
+class Neuron;
+
 typedef std::map<Entity*, double> WeightMap;
+typedef std::vector<Neuron*> NeuronVector;
 
 const double lc_c = 0.5;
-const int it_c = 1000;
+const int it_c = 1000000;
 
 val_t signum(val_t);
 
@@ -26,10 +29,10 @@ public:
     double set_learn_const(double lc);
     int set_iterations(int it);
     void print_weights();
-    bool learn(TestSet testset, Inputs &inputs);
+    unsigned int learn(TestSetVector testset, Inputs &inputs);
 private:
     bool check(TestSetStruct test, Inputs &inputs);
-    unsigned int check_all(TestSet testset, Inputs &inputs);
+    unsigned int check_all(TestSetVector testset, Inputs &inputs);
     
     val_t (*act_func) (val_t);
     WeightMap weights;
