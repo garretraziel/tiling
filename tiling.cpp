@@ -36,13 +36,13 @@ int main(int argc, char *argv[]) {
     Neuron *last_master;
 
     while (true) {
-        std::cout << "adding new layer\n";
         Neuron *master = new Neuron(previous_layer);
         all_neurons.push_back(master);
         current_layer.push_back(master);
         last_master = master;
 
-        std::cout << "adding master unit" << std::endl;
+        std::cout << "M";
+        std::cout.flush();
         if (master->learn(testset.tests, inputs) == 0) {
             break;
         }
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
             std::string smallest_unfaightful;
             StrTestMap::iterator stit;
             for (stit = classes.begin(); stit != classes.end(); stit++) {
-                // std::cout << stit->first << " " << stit->second.size() << std::endl;
+                std::cout << stit->first << " " << stit->second.size() << std::endl;
                 if (unfaightful(stit->second)) {
                     if (smallest_unfaightful == "" || classes[smallest_unfaightful].size() > stit->second.size()) {
                         smallest_unfaightful = stit->first;
@@ -82,20 +82,22 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (smallest_unfaightful != "") {
-                // std::cout << "smallest unfaightful: " << smallest_unfaightful << std::endl;
+                std::cout << "smallest unfaightful: " << smallest_unfaightful << std::endl;
                 all_faightful = false;
-                std::cout << "adding ancillary unit" << std::endl;
+                std::cout << "a" << classes[smallest_unfaightful].size();
+                std::cout.flush();
                 Neuron *ancilliary = new Neuron(previous_layer);
                 all_neurons.push_back(ancilliary);
                 current_layer.push_back(ancilliary);
                 // std::cout << "test size: " << classes[smallest_unfaightful].size() << std::endl;
-                ancilliary->learn(classes[smallest_unfaightful], inputs);
+                std::cout << "errors: " << ancilliary->learn(classes[smallest_unfaightful], inputs) << std::endl;
                 // std::cout << "learned\n";
             }
         }
         
         previous_layer = copy_neuron_to_entity(current_layer);
         current_layer.clear();
+        std::cout << std::endl;
     }
 
     TestSetVector::iterator tsit;

@@ -91,8 +91,8 @@ unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
     unsigned int current_length = 0;
     WeightMap pocket = weights;
     unsigned int errors = check_all(testset, inputs);
-    // print_weights();
-    // int changed_times = 0;
+    print_weights();
+    int changed_times = 0;
 
     // TestSetVector::iterator it;
     // for (it = testset.begin(); it != testset.end(); it++) {
@@ -131,8 +131,8 @@ unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
 
     weights = pocket;
 
-    // std::cout << "final: ";
-    // print_weights();
+    std::cout << "final: ";
+    print_weights();
     // std::cout << "changed: " << changed_times << std::endl;
 
     return check_all(testset, inputs);
