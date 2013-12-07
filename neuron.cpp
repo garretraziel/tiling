@@ -29,7 +29,7 @@ Neuron::Neuron(EntityVector entities):
     }
     bias = new Constant(1);
     weights[bias] = ((double) rand())/RAND_MAX;
-    //weights[bias] = 1;
+    //weights[bias] = 0;
 }
 
 val_t Neuron::val() {
