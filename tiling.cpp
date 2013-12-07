@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
         error_rate rate = crossvalidate(testset.tests);
         std::cout << "Ten-times ten-fold crossvalidation showed "
-                  << rate.rate << " % error rate.\nMin: " << rate.min
+                  << 100-rate.rate << " % success rate.\nMin: " << rate.min
                   << "\nMax: " << rate.max << std::endl;
     }
         
