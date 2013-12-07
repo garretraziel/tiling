@@ -25,7 +25,6 @@ public:
     ~Neuron() {delete bias;}
 
     val_t val();
-    void change_weight(TestSetStruct sample, Inputs &inputs);
     double set_learn_const(double lc);
     int set_iterations(int it);
     void print_weights();
@@ -33,6 +32,7 @@ public:
 private:
     bool check(TestSetStruct test, Inputs &inputs);
     unsigned int check_all(TestSetVector testset, Inputs &inputs);
+    void change_weight(TestSetStruct sample, Inputs &inputs);
     
     val_t (*act_func) (val_t);
     WeightMap weights;

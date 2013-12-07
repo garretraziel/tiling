@@ -36,16 +36,17 @@ int main(int argc, char *argv[]) {
     Neuron *last_master;
 
     while (true) {
+        std::cout << "adding new layer\n";
         Neuron *master = new Neuron(previous_layer);
         all_neurons.push_back(master);
         current_layer.push_back(master);
         last_master = master;
 
-        std::cout << "learning master..." << std::endl;
+        std::cout << "adding master unit" << std::endl;
         if (master->learn(testset.tests, inputs) == 0) {
             break;
         }
-        std::cout << "learned master." << std::endl;
+        // std::cout << "learned master." << std::endl;
 
         bool all_faightful = false;
         while (!all_faightful) {
@@ -73,7 +74,7 @@ int main(int argc, char *argv[]) {
             std::string smallest_unfaightful;
             StrTestMap::iterator stit;
             for (stit = classes.begin(); stit != classes.end(); stit++) {
-                std::cout << stit->first << " " << stit->second.size() << std::endl;
+                // std::cout << stit->first << " " << stit->second.size() << std::endl;
                 if (unfaightful(stit->second)) {
                     if (smallest_unfaightful == "" || classes[smallest_unfaightful].size() > stit->second.size()) {
                         smallest_unfaightful = stit->first;
@@ -81,14 +82,15 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (smallest_unfaightful != "") {
-                std::cout << "smallest unfaightful: " << smallest_unfaightful << std::endl;
+                // std::cout << "smallest unfaightful: " << smallest_unfaightful << std::endl;
                 all_faightful = false;
+                std::cout << "adding ancillary unit" << std::endl;
                 Neuron *ancilliary = new Neuron(previous_layer);
                 all_neurons.push_back(ancilliary);
                 current_layer.push_back(ancilliary);
-                std::cout << "test size: " << classes[smallest_unfaightful].size() << std::endl;
+                // std::cout << "test size: " << classes[smallest_unfaightful].size() << std::endl;
                 ancilliary->learn(classes[smallest_unfaightful], inputs);
-                std::cout << "learned\n";
+                // std::cout << "learned\n";
             }
         }
         

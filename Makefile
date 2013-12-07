@@ -1,4 +1,3 @@
-CXX=clang++
 CXXFLAGS=-Wall -Wextra -pedantic -g
 TARGET=tiling
 
