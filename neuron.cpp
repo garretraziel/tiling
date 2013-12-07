@@ -80,34 +80,32 @@ unsigned int Neuron::check_all(TestSetVector testset, Inputs &inputs) {
     unsigned int count = 0;
     TestSetVector::iterator it;
 
-    unsigned int count_l = 0;
-    unsigned int count_r = 0;
-    unsigned int count_f = 0;
-    unsigned int count_s = 0;
-    
+    unsigned int sum_f = 0;
+    unsigned int sum_s = 0;
+    unsigned int corr_f = 0;
+    unsigned int corr_s = 0;
+    val_t first_class = testset[0].type;
     
     for (it = testset.begin(); it != testset.end(); it++) {
-        if (it->type == 1) {
-            count_f++;
+        if (it->type == first_class) {
+            sum_f++;
             if (!check(*it, inputs)) {
                 count++;
-                count_r++;
             } else {
-                count_l++;
+                corr_f++;
             }
         } else {
-            count_s++;
+            sum_s++;
             if (!check(*it, inputs)) {
                 count++;
-                count_l++;
             } else {
-                count_r++;
+                corr_s++;
             }
         }
     }
     
-    if (count_l != 0 && count_r != 0) return count;
-    else return testset.size();
+    if ((sum_f != 0 && corr_f == 0) || (sum_s != 0 && corr_s == 0)) return testset.size();
+    else return count;
 }
 
 unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {    
