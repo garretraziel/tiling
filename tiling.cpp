@@ -16,8 +16,9 @@ std::string bipolar_to_string(IntVector values);
 bool unfaightful(TestSetVector tests);
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cerr << "[ERR] filename argument" << std::endl;
+    if (argc != 3) {
+        std::cerr << "[ERR] bad arguments, expecting:" << std::endl;
+        std::cerr << argv[0] << " train_set data_set" << std::endl;
         return 1;
     }
 
@@ -25,7 +26,13 @@ int main(int argc, char *argv[]) {
     
     TestSet testset;
     if (!testset.read_testset(argv[1])) {
-        std::cerr << "[ERR] cannot read testset file" << std::endl;
+        std::cerr << "[ERR] cannot read train set file" << std::endl;
+        return 1;
+    }
+
+    TestSet dataset;
+    if (!dataset.read_testset(argv[2])) {
+        std::cerr << "[ERR] cannot read test set file" << std::endl;
         return 1;
     }
     
@@ -74,7 +81,6 @@ int main(int argc, char *argv[]) {
             std::string smallest_unfaightful;
             StrTestMap::iterator stit;
             for (stit = classes.begin(); stit != classes.end(); stit++) {
-                std::cout << stit->first << " " << stit->second.size() << std::endl;
                 if (unfaightful(stit->second)) {
                     if (smallest_unfaightful == "" || classes[smallest_unfaightful].size() > stit->second.size()) {
                         smallest_unfaightful = stit->first;
@@ -82,15 +88,14 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (smallest_unfaightful != "") {
-                std::cout << "smallest unfaightful: " << smallest_unfaightful << std::endl;
                 all_faightful = false;
-                std::cout << "a" << classes[smallest_unfaightful].size();
+                std::cout << "a";
                 std::cout.flush();
                 Neuron *ancilliary = new Neuron(previous_layer);
                 all_neurons.push_back(ancilliary);
                 current_layer.push_back(ancilliary);
                 // std::cout << "test size: " << classes[smallest_unfaightful].size() << std::endl;
-                std::cout << "errors: " << ancilliary->learn(classes[smallest_unfaightful], inputs) << std::endl;
+                ancilliary->learn(classes[smallest_unfaightful], inputs);
                 // std::cout << "learned\n";
             }
         }
@@ -100,14 +105,41 @@ int main(int argc, char *argv[]) {
         std::cout << std::endl;
     }
 
+    std::cout << "\nTrain Set:\n";
+    
     TestSetVector::iterator tsit;
     for (tsit = testset.tests.begin(); tsit != testset.tests.end(); tsit++) {
         inputs.set_values(tsit->inputs);
-        if (tsit->type == last_master->val()) {
-            std::cout << "OK" << std::endl;
+        val_t result = last_master->val();
+        if (tsit->type == result) {
+            std::cout << " [OK]  " << tsit->type << " == " << result;
         } else {
-            std::cout << "FAIL!" << std::endl;
+            std::cout << "[FAIL] " << tsit->type << " != " << result;
         }
+        std::cout << ", values:";
+        InputVector::iterator iit;
+        for (iit = tsit->inputs.begin(); iit != tsit->inputs.end(); iit++) {
+            std::cout << " " << *iit;
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Test set:\n";
+    
+    for (tsit = dataset.tests.begin(); tsit != dataset.tests.end(); tsit++) {
+        inputs.set_values(tsit->inputs);
+        val_t result = last_master->val();
+        if (tsit->type == result) {
+            std::cout << " [OK]  " << tsit->type << " == " << result;
+        } else {
+            std::cout << "[FAIL] " << tsit->type << " != " << result;
+        }
+        std::cout << ", values:";
+        InputVector::iterator iit;
+        for (iit = tsit->inputs.begin(); iit != tsit->inputs.end(); iit++) {
+            std::cout << " " << *iit;
+        }
+        std::cout << std::endl;
     }
     
     NeuronVector::iterator it;
