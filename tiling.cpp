@@ -30,11 +30,9 @@ int main(int argc, char *argv[]) {
     }
     
     Inputs inputs(testset.input_length);
-    EntityVector entities(inputs.as_entities());
-
     NeuronVector all_neurons;
     NeuronVector current_layer;
-    EntityVector previous_layer = entities;
+    EntityVector previous_layer = inputs.as_entities();
     Neuron *last_master;
 
     while (true) {

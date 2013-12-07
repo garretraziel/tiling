@@ -2,6 +2,7 @@
 #include "constant.hpp"
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
 
 val_t signum(val_t sum) {
     return sum > 0? 1 : -1;
@@ -24,10 +25,11 @@ Neuron::Neuron(EntityVector entities):
     EntityVector::iterator it;
     for (it = entities.begin(); it != entities.end(); it++) {
         weights[*it] = ((double) rand())/RAND_MAX;
-        //weights[*it] = 0;
+        //weights[*it] = 1;
     }
     bias = new Constant(1);
     weights[bias] = ((double) rand())/RAND_MAX;
+    //weights[bias] = 1;
 }
 
 val_t Neuron::val() {
@@ -84,6 +86,35 @@ unsigned int Neuron::check_all(TestSetVector testset, Inputs &inputs) {
 }
 
 unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
+    // TestSetVector local_testset = testset;
+    // unsigned int best_error = check_all(local_testset, inputs);
+    // WeightMap pocket = weights;
+    // int k = 1;
+
+    // while (k < iterations) {
+    //     unsigned int error = check_all(local_testset, inputs);
+    //     if (error < best_error) {
+    //         best_error = error;
+    //         pocket = weights;
+    //     }
+    //     if (error == 0) break;
+
+    //     std::random_shuffle(local_testset.begin(), local_testset.end());
+
+    //     TestSetVector::iterator it;
+    //     for (it = local_testset.begin(); it != local_testset.end(); it++) {
+    //         if (!check(*it, inputs)) {
+    //             change_weight(*it, inputs);
+    //         }
+    //     }
+
+    //     k++;
+    // }
+
+    // weights = pocket;
+
+    // return check_all(testset, inputs);
+    
     int k = 1;
     unsigned int best_length = 0;
     unsigned int current_length = 0;
@@ -92,6 +123,7 @@ unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
 
     while (k < iterations) {
         TestSetStruct sample = testset[rand()%testset.size()];
+        //TestSetStruct sample = testset[k%testset.size()];
 
         if (check(sample, inputs)) {
             current_length++;
