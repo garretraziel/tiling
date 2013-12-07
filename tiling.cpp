@@ -14,6 +14,8 @@ typedef std::map<std::string, TestSetVector> StrTestMap;
 EntityVector copy_neuron_to_entity(NeuronVector neurons);
 std::string bipolar_to_string(IntVector values);
 bool unfaightful(TestSetVector tests);
+bool smallest_unfaightful(TestSet testset, Inputs &inputs, NeuronVector &current_layer, TestSetVector &result);
+int check_network(TestSet testset, Inputs &inputs, Neuron *last_master);
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -53,50 +55,20 @@ int main(int argc, char *argv[]) {
         if (master->learn(testset.tests, inputs) == 0) {
             break;
         }
-        // std::cout << "learned master." << std::endl;
 
         bool all_faightful = false;
         while (!all_faightful) {
             all_faightful = true;
-            StrTestMap classes;
-            TestSetVector::iterator it;
-            for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
-                inputs.set_values(it->inputs);
+            TestSetVector unfaightful_vector;
             
-                IntVector prototype;
-                NeuronVector::iterator nit;
-                for (nit = current_layer.begin(); nit != current_layer.end(); nit++) {
-                    prototype.push_back((*nit)->val());
-                }
-
-                std::string class_rep = bipolar_to_string(prototype);
-                if (classes.find(class_rep) == classes.end()) {
-                    TestSetVector vector;
-                    classes[class_rep] = vector;
-                }
-
-                classes[class_rep].push_back(*it);
-            }
-
-            std::string smallest_unfaightful;
-            StrTestMap::iterator stit;
-            for (stit = classes.begin(); stit != classes.end(); stit++) {
-                if (unfaightful(stit->second)) {
-                    if (smallest_unfaightful == "" || classes[smallest_unfaightful].size() > stit->second.size()) {
-                        smallest_unfaightful = stit->first;
-                    }
-                }
-            }
-            if (smallest_unfaightful != "") {
+            if (smallest_unfaightful(testset, inputs, current_layer, unfaightful_vector)) {
                 all_faightful = false;
                 std::cout << "a";
                 std::cout.flush();
                 Neuron *ancilliary = new Neuron(previous_layer);
                 all_neurons.push_back(ancilliary);
                 current_layer.push_back(ancilliary);
-                // std::cout << "test size: " << classes[smallest_unfaightful].size() << std::endl;
-                ancilliary->learn(classes[smallest_unfaightful], inputs);
-                // std::cout << "learned\n";
+                ancilliary->learn(unfaightful_vector, inputs);
             }
         }
         
@@ -106,42 +78,11 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "\nTrain Set:\n";
+    check_network(testset, inputs, last_master);
     
-    TestSetVector::iterator tsit;
-    for (tsit = testset.tests.begin(); tsit != testset.tests.end(); tsit++) {
-        inputs.set_values(tsit->inputs);
-        val_t result = last_master->val();
-        if (tsit->type == result) {
-            std::cout << " [OK]  " << tsit->type << " == " << result;
-        } else {
-            std::cout << "[FAIL] " << tsit->type << " != " << result;
-        }
-        std::cout << ", values:";
-        InputVector::iterator iit;
-        for (iit = tsit->inputs.begin(); iit != tsit->inputs.end(); iit++) {
-            std::cout << " " << *iit;
-        }
-        std::cout << std::endl;
-    }
-
     std::cout << "Test set:\n";
-    
-    for (tsit = dataset.tests.begin(); tsit != dataset.tests.end(); tsit++) {
-        inputs.set_values(tsit->inputs);
-        val_t result = last_master->val();
-        if (tsit->type == result) {
-            std::cout << " [OK]  " << tsit->type << " == " << result;
-        } else {
-            std::cout << "[FAIL] " << tsit->type << " != " << result;
-        }
-        std::cout << ", values:";
-        InputVector::iterator iit;
-        for (iit = tsit->inputs.begin(); iit != tsit->inputs.end(); iit++) {
-            std::cout << " " << *iit;
-        }
-        std::cout << std::endl;
-    }
-    
+    check_network(dataset, inputs, last_master);
+        
     NeuronVector::iterator it;
     for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
         delete *it;
@@ -176,4 +117,63 @@ bool unfaightful(TestSetVector tests) {
         if (it->type != first_type) return true;
     }
     return false;
+}
+
+bool smallest_unfaightful(TestSet testset, Inputs &inputs, NeuronVector &current_layer, TestSetVector &result) {
+    StrTestMap classes;
+    TestSetVector::iterator it;
+    for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
+        inputs.set_values(it->inputs);
+        
+        IntVector prototype;
+        NeuronVector::iterator nit;
+        for (nit = current_layer.begin(); nit != current_layer.end(); nit++) {
+            prototype.push_back((*nit)->val());
+        }
+        
+        std::string class_rep = bipolar_to_string(prototype);
+        if (classes.find(class_rep) == classes.end()) {
+            TestSetVector vector;
+            classes[class_rep] = vector;
+        }
+        
+        classes[class_rep].push_back(*it);
+    }
+    
+    std::string smallest_unfaightful_s;
+    StrTestMap::iterator stit;
+    for (stit = classes.begin(); stit != classes.end(); stit++) {
+        if (unfaightful(stit->second)) {
+            if (smallest_unfaightful_s == "" || classes[smallest_unfaightful_s].size() > stit->second.size()) {
+                smallest_unfaightful_s = stit->first;
+            }
+        }
+    }
+    if (smallest_unfaightful_s == "") return false;
+    else {
+        result = classes[smallest_unfaightful_s];
+        return true;
+    }
+}
+
+int check_network(TestSet testset, Inputs &inputs, Neuron *last_master) {
+    int errors = 0;
+    TestSetVector::iterator tsit;
+    for (tsit = testset.tests.begin(); tsit != testset.tests.end(); tsit++) {
+        inputs.set_values(tsit->inputs);
+        val_t result = last_master->val();
+        if (tsit->type == result) {
+            std::cout << " [OK]  " << tsit->type << " == " << result;
+        } else {
+            std::cout << "[FAIL] " << tsit->type << " != " << result;
+            errors++;
+        }
+        std::cout << ", values:";
+        InputVector::iterator iit;
+        for (iit = tsit->inputs.begin(); iit != tsit->inputs.end(); iit++) {
+            std::cout << " " << *iit;
+        }
+        std::cout << std::endl;
+    }
+    return errors;
 }
