@@ -11,6 +11,7 @@
 typedef std::vector<int> IntVector;
 typedef std::map<std::string, TestSetVector> StrTestMap;
 
+void create_network(TestSet testset, Inputs &inputs, NeuronVector &all_neurons, Neuron *&last_master);
 EntityVector copy_neuron_to_entity(NeuronVector neurons);
 std::string bipolar_to_string(IntVector values);
 bool unfaightful(TestSetVector tests);
@@ -37,12 +38,29 @@ int main(int argc, char *argv[]) {
         std::cerr << "[ERR] cannot read test set file" << std::endl;
         return 1;
     }
-    
+
     Inputs inputs(testset.input_length);
     NeuronVector all_neurons;
+    Neuron *last_master;
+    create_network(testset, inputs, all_neurons, last_master);
+    
+    std::cout << "\nTrain Set:\n";
+    check_network(testset, inputs, last_master);
+    
+    std::cout << "Test set:\n";
+    check_network(dataset, inputs, last_master);
+        
+    NeuronVector::iterator it;
+    for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
+        delete *it;
+    }
+    
+    return 0;
+}
+
+void create_network(TestSet testset, Inputs &inputs, NeuronVector &all_neurons, Neuron *&last_master) {
     NeuronVector current_layer;
     EntityVector previous_layer = inputs.as_entities();
-    Neuron *last_master;
 
     while (true) {
         Neuron *master = new Neuron(previous_layer);
@@ -76,19 +94,6 @@ int main(int argc, char *argv[]) {
         current_layer.clear();
         std::cout << std::endl;
     }
-
-    std::cout << "\nTrain Set:\n";
-    check_network(testset, inputs, last_master);
-    
-    std::cout << "Test set:\n";
-    check_network(dataset, inputs, last_master);
-        
-    NeuronVector::iterator it;
-    for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
-        delete *it;
-    }
-    
-    return 0;
 }
 
 EntityVector copy_neuron_to_entity(NeuronVector neurons) {
