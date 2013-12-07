@@ -4,61 +4,85 @@
 #include <ctime>
 #include <vector>
 #include <map>
+#include <algorithm>
+
 #include "constant.hpp"
 #include "neuron.hpp"
 #include "testset.hpp"
 
 typedef std::vector<int> IntVector;
 typedef std::map<std::string, TestSetVector> StrTestMap;
+typedef struct {
+    double rate;
+    int min;
+    int max;
+} error_rate;
 
-void create_network(TestSet testset, Inputs &inputs, NeuronVector &all_neurons, Neuron *&last_master);
+const int folds = 10;
+
+void create_network(TestSetVector testset, Inputs &inputs, NeuronVector &all_neurons, Neuron *&last_master);
 EntityVector copy_neuron_to_entity(NeuronVector neurons);
 std::string bipolar_to_string(IntVector values);
 bool unfaightful(TestSetVector tests);
-bool smallest_unfaightful(TestSet testset, Inputs &inputs, NeuronVector &current_layer, TestSetVector &result);
-int check_network(TestSet testset, Inputs &inputs, Neuron *last_master);
+bool smallest_unfaightful(TestSetVector testset, Inputs &inputs, NeuronVector &current_layer, TestSetVector &result);
+int check_network(TestSetVector testset, Inputs &inputs, Neuron *last_master);
+error_rate crossvalidate(TestSetVector testset);
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc != 3 && argc != 2) {
         std::cerr << "[ERR] bad arguments, expecting:" << std::endl;
         std::cerr << argv[0] << " train_set data_set" << std::endl;
+        std::cerr << "or for ten-fold crossvalidation:" << std::endl;
+        std::cerr << argv[0] << " data_set" << std::endl;
         return 1;
     }
 
     srand(time(NULL));
-    
-    TestSet testset;
-    if (!testset.read_testset(argv[1])) {
-        std::cerr << "[ERR] cannot read train set file" << std::endl;
-        return 1;
-    }
 
-    TestSet dataset;
-    if (!dataset.read_testset(argv[2])) {
-        std::cerr << "[ERR] cannot read test set file" << std::endl;
-        return 1;
-    }
+    if (argc == 3) {
+        TestSet testset;
+        if (!testset.read_testset(argv[1])) {
+            std::cerr << "[ERR] cannot read train set file" << std::endl;
+            return 1;
+        }
 
-    Inputs inputs(testset.input_length);
-    NeuronVector all_neurons;
-    Neuron *last_master;
-    create_network(testset, inputs, all_neurons, last_master);
+        TestSet dataset;
+        if (!dataset.read_testset(argv[2])) {
+            std::cerr << "[ERR] cannot read test set file" << std::endl;
+            return 1;
+        }
+
+        Inputs inputs(testset.input_length);
+        NeuronVector all_neurons;
+        Neuron *last_master;
+        create_network(testset.tests, inputs, all_neurons, last_master);
     
-    std::cout << "\nTrain Set:\n";
-    check_network(testset, inputs, last_master);
-    
-    std::cout << "Test set:\n";
-    check_network(dataset, inputs, last_master);
+        std::cout << "\nTrain Set: " << check_network(testset.tests, inputs, last_master)
+                  << " errors out of " << testset.tests.size() << ".\n";
+        std::cout << "Test Set: " << check_network(dataset.tests, inputs, last_master)
+                  << " errors out of " << dataset.tests.size() << ".\n";
         
-    NeuronVector::iterator it;
-    for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
-        delete *it;
+        NeuronVector::iterator it;
+        for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
+            delete *it;
+        }
+    } else {
+        TestSet testset;
+        if (!testset.read_testset(argv[1])) {
+            std::cerr << "[ERR] cannot read train set file" << std::endl;
+            return 1;
+        }
+
+        error_rate rate = crossvalidate(testset.tests);
+        std::cout << "Ten-times ten-fold crossvalidation showed "
+                  << rate.rate << " % error rate.\nMin: " << rate.min
+                  << "\nMax: " << rate.max << std::endl;
     }
-    
+        
     return 0;
 }
 
-void create_network(TestSet testset, Inputs &inputs, NeuronVector &all_neurons, Neuron *&last_master) {
+void create_network(TestSetVector testset, Inputs &inputs, NeuronVector &all_neurons, Neuron *&last_master) {
     NeuronVector current_layer;
     EntityVector previous_layer = inputs.as_entities();
 
@@ -70,7 +94,8 @@ void create_network(TestSet testset, Inputs &inputs, NeuronVector &all_neurons, 
 
         std::cout << "M";
         std::cout.flush();
-        if (master->learn(testset.tests, inputs) == 0) {
+        if (master->learn(testset, inputs) == 0) {
+            std::cout << std::endl;
             break;
         }
 
@@ -124,10 +149,10 @@ bool unfaightful(TestSetVector tests) {
     return false;
 }
 
-bool smallest_unfaightful(TestSet testset, Inputs &inputs, NeuronVector &current_layer, TestSetVector &result) {
+bool smallest_unfaightful(TestSetVector testset, Inputs &inputs, NeuronVector &current_layer, TestSetVector &result) {
     StrTestMap classes;
     TestSetVector::iterator it;
-    for (it = testset.tests.begin(); it != testset.tests.end(); it++) {
+    for (it = testset.begin(); it != testset.end(); it++) {
         inputs.set_values(it->inputs);
         
         IntVector prototype;
@@ -161,24 +186,81 @@ bool smallest_unfaightful(TestSet testset, Inputs &inputs, NeuronVector &current
     }
 }
 
-int check_network(TestSet testset, Inputs &inputs, Neuron *last_master) {
+int check_network(TestSetVector testset, Inputs &inputs, Neuron *last_master) {
     int errors = 0;
     TestSetVector::iterator tsit;
-    for (tsit = testset.tests.begin(); tsit != testset.tests.end(); tsit++) {
+    for (tsit = testset.begin(); tsit != testset.end(); tsit++) {
         inputs.set_values(tsit->inputs);
         val_t result = last_master->val();
-        if (tsit->type == result) {
-            std::cout << " [OK]  " << tsit->type << " == " << result;
-        } else {
-            std::cout << "[FAIL] " << tsit->type << " != " << result;
+        if (tsit->type != result) {
             errors++;
         }
-        std::cout << ", values:";
-        InputVector::iterator iit;
-        for (iit = tsit->inputs.begin(); iit != tsit->inputs.end(); iit++) {
-            std::cout << " " << *iit;
-        }
-        std::cout << std::endl;
     }
     return errors;
+}
+
+error_rate crossvalidate(TestSetVector testset) {
+    error_rate rate; rate.min = -1; rate.max = -1;
+    
+    int testset_size = testset.size();
+    TestSetVector first_class;
+    TestSetVector second_class;
+    val_t first_type = testset[0].type;
+
+    TestSetVector::iterator it;
+    for (it = testset.begin(); it != testset.end(); it++) {
+        if (it->type == first_type) {
+            first_class.push_back(*it);
+        } else {
+            second_class.push_back(*it);
+        }
+    }
+
+    int errors = 0;
+    int count = 0;
+    for (int i = 0; i < folds; i++) {
+        std::random_shuffle(first_class.begin(), first_class.end());
+        std::random_shuffle(second_class.begin(), second_class.end());
+        
+        std::vector<TestSetVector> folds_vector;
+
+        for (int j = 0; j < folds; j++) {
+            TestSetVector fold;
+            for (int k = 0; k < testset_size/folds/2; k++) {
+                fold.push_back(first_class[j*5+k]);
+                fold.push_back(second_class[j*5+k]);
+            }
+            folds_vector.push_back(fold);
+        }
+
+        for (int j = 0; j < folds; j++) {
+            TestSetVector dataset = folds_vector[j];
+            TestSetVector train_set;
+            for (int k = 0; k < folds; k++) {
+                if (k != j) {
+                    train_set.insert(train_set.end(), folds_vector[k].begin(), folds_vector[k].end());
+                }
+            }
+
+            Inputs inputs(train_set[0].inputs.size());
+            NeuronVector all_neurons;
+            Neuron *last_master;
+            create_network(train_set, inputs, all_neurons, last_master);
+
+            int error = check_network(dataset, inputs, last_master);
+            if (error > rate.max) rate.max = error;
+            if (error < rate.min || rate.min == -1) rate.min = error;
+            
+            errors += error;
+            count += dataset.size();
+        
+            NeuronVector::iterator it;
+            for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
+                delete *it;
+            }
+            std::cout << "Errors: " << error << "\n-\n";
+        }
+    }
+    rate.rate = ((double) errors)/count*100;
+    return rate;
 }
