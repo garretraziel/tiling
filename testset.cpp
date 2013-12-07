@@ -1,6 +1,7 @@
 #include "testset.hpp"
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 TestSet::TestSet(std::string filename) {
     read_testset(filename);

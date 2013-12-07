@@ -85,41 +85,14 @@ unsigned int Neuron::check_all(TestSetVector testset, Inputs &inputs) {
     return count;
 }
 
-unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
-    // TestSetVector local_testset = testset;
-    // unsigned int best_error = check_all(local_testset, inputs);
-    // WeightMap pocket = weights;
-    // int k = 1;
-
-    // while (k < iterations) {
-    //     unsigned int error = check_all(local_testset, inputs);
-    //     if (error < best_error) {
-    //         best_error = error;
-    //         pocket = weights;
-    //     }
-    //     if (error == 0) break;
-
-    //     std::random_shuffle(local_testset.begin(), local_testset.end());
-
-    //     TestSetVector::iterator it;
-    //     for (it = local_testset.begin(); it != local_testset.end(); it++) {
-    //         if (!check(*it, inputs)) {
-    //             change_weight(*it, inputs);
-    //         }
-    //     }
-
-    //     k++;
-    // }
-
-    // weights = pocket;
-
-    // return check_all(testset, inputs);
-    
+unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {    
     int k = 1;
     unsigned int best_length = 0;
     unsigned int current_length = 0;
     WeightMap pocket = weights;
     unsigned int errors = check_all(testset, inputs);
+    print_weights();
+    int changed_times = 0;
 
     while (k < iterations) {
         TestSetStruct sample = testset[rand()%testset.size()];
@@ -135,6 +108,7 @@ unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
                 pocket = weights;
             }
             change_weight(sample, inputs);
+            changed_times++;
             current_length = 0;
         }
         
@@ -146,6 +120,10 @@ unsigned int Neuron::learn(TestSetVector testset, Inputs &inputs) {
     }
 
     weights = pocket;
+
+    std::cout << "final: ";
+    print_weights();
+    std::cout << "changed: " << changed_times << std::endl;
 
     return check_all(testset, inputs);
 }

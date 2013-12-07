@@ -13,7 +13,7 @@ typedef std::map<Entity*, double> WeightMap;
 typedef std::vector<Neuron*> NeuronVector;
 
 const double lc_c = 0.5;
-const int it_c = 1000;
+const int it_c = 1000000;
 
 val_t signum(val_t);
 

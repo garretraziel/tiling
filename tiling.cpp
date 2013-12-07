@@ -41,9 +41,11 @@ int main(int argc, char *argv[]) {
         current_layer.push_back(master);
         last_master = master;
 
+        std::cout << "learning master..." << std::endl;
         if (master->learn(testset.tests, inputs) == 0) {
             break;
         }
+        std::cout << "learned master." << std::endl;
 
         bool all_faightful = false;
         while (!all_faightful) {
@@ -86,6 +88,7 @@ int main(int argc, char *argv[]) {
                 current_layer.push_back(ancilliary);
                 std::cout << "test size: " << classes[smallest_unfaightful].size() << std::endl;
                 ancilliary->learn(classes[smallest_unfaightful], inputs);
+                std::cout << "learned\n";
             }
         }
         
