@@ -9,7 +9,7 @@
 \frenchspacing
 \begin{document}
 \maketitle
-\section*{Úvod}
+\section{Úvod}
 Následující text se zabývá použitím algoritmu \emph{Tiling} pro vytváření neuronových sítí s~proměnnou topologií. U~tradičních neuronových sítí, které mají topologii předem pevně danou, je důležitou vlastností algoritmus pro správné nastavování vah spojů, učení. Mezi nejznámější patří například algoritmus \emph{Backpropagation}, který pro zmenšování chyby sítě používá zpětné šíření chyby.
 
 U~neuronových sítí s~pevně danou topologií můžeme narazit na mnoho problémů. Při učení sítě algoritmem Backpropagation musíme předem vědět, kolik musí mít síť skrytých vrstev a kolik má být neuronů v~každé vrstvě. Jedná se však o~netriviální úlohu a její řešení má výrazný vliv na kvalitu sítě. Řešením tohoto problému je použití algoritmu pro vytváření sítě s~proměnnou topologií. Tyto algoritmy začínají budovat síť od jednoho jediného neuronu a postupně přidávají neurony v~téže vrstvě, případě při\-dá\-va\-jí vrstvy nové, dokud není síť schopna daný problém vyřešit. Výsledkem takovýchto algoritmů jsou díky tomu jednoduché a dostatečně malé sítě.
@@ -18,10 +18,10 @@ Jedním z~algoritmů pro vytváření sítě s~proměnnou topologií je algoritm
 
 V~rám\-ci práce byl algoritmus Tiling implementován a byla změřena úspěšnost jím vytvářených sítí na dvou různých problémech.
 
-\section*{Rozbor použitých metod}
+\section{Rozbor použitých metod}
 Síť, vytvořená algoritmem Tiling, sestává z~dopředně propojených per\-cep\-tro\-nů. V~původní práci~\cite{mezard} se pro učení jednotlivých přidávaných perceptronů používal pocket algoritmus, ačkoliv bylo později ukázáno, že zvolený učící algoritmus má na výslednou síť velký vliv, přičemž jednoduchý pocket algoritmus vrací spíše horší výsledky~\cite{twovariants}. Algoritmus Tiling byl implementován podle původní práce.
 
-\subsection*{Algoritmus Tiling}
+\subsection{Algoritmus Tiling}
 Algoritmus Tiling je založen na postupném přidávání vrstev, přičemž každá vrstva sníží počet chybně klasifikovaných vzorků nejméně o~jedna~\cite{mezard}. V~rám\-ci jedné vrstvy je pak nutné zachovat tzv.\ \emph{věrohodnost} (v~originále \emph{faithfulness}) všech skupin, do kterých jsou vstupní vzorky v~dané vrstvě klasifikovány (nazývaný také jako \emph{prototyp}).
 
 Na počátku algoritmu vytvoříme první neuron a pomocí pocket algoritmu jej naučíme co nejlépe klasifikovat vstupní vzorky. Poté identifikujeme skupiny (tvořené různými kombinacemi výstupních hodnot neuronů v~dané vrstvě), které jsou nevěrohodné - do kterých jsou klasifikovány vzorky různých tříd. Vybereme nejvhodnější nevěrohodnou skupinu (v~původním textu je vybrána nejmenší skupina) a identifikujeme všechny vzorky, které jsou do této skupiny klasifikovány. Do aktuální vrstvy přidáme nový neuron a jako vstup pro pocket algoritmus použijeme všechny tyto vzorky. Kontrolu vě\-ro\-hod\-nos\-ti všech množin a přidávání pobočných neuronů provádíme tak dlouho, dokud nejsou všechny skupiny věrohodné. Poté do sítě přidáme novou vrstvu s~jedním neuronem, kterým se opět budeme snažit co nejlépe klasifikovat všechny vstupní vzorky. Všechny neurony nové vrstvy jsou při\-po\-je\-ny k~neuronům předchozí vrstvy. Výstup $S$ neuronu $i$ vrstvy $L$ při počtu neuronů předchozí vrstvy $N_{L-1}$ je spočítán jako:
@@ -32,14 +32,14 @@ Na počátku algoritmu vytvoříme první neuron a pomocí pocket algoritmu jej 
 
 Algoritmus končí ve chvíli, kdy je první přidaný neuron, \emph{Master} neuron, schopen správně klasifikovat vstup, to znamená pokud je výstup z~předchozí vrstvy lineárně separovatelný.
 
-\subsection*{Pocket algoritmus}
+\subsection{Pocket algoritmus}
 Pocket algoritmus je variantou algoritmu pro učení TLU, který dosahuje optimálních hodnot i při učení na vstupech, které nejsou lineárně separovatelné~\cite{ranka}. Využívá k~tomu tzv.\ \emph{kapsy}, ve které je uchováno řešení, které doposud dokázalo klasifikovat s~co nejmenším počtem chyb.
 
 Pocket algoritmus pracuje obdobně jako původní pravidlo učení perceptronu. Vzorky pro učení vybírá z~množiny náhodně. Pokud dojde ke špatné klasifikaci, algoritmus upraví váhy a také zkontroluje, zda je aktuální nastavení vah úspěšnější při klasifikaci, než váhy uložené v~kapse. Pokud ano, aktualizuje obsah kapsy těmito hodnotami.
 
 Na konci algoritmu je nejlepší aproximace rozdělení uložená v~kapse.
 
-\subsubsection*{Problém rozdělování tříd}
+\subsubsection{Problém rozdělování tříd}
 Pro hledání vah \emph{Master} neuronu bylo možné použít pocket algoritmus v~ne\-změ\-ně\-né podobě. Pro učení pobočných neuronů však bylo nutno tento algoritmus upravit. Úkolem pobočných neuronů totiž není najít nejlepší aproximaci klasifikace, ale rozdělit vstupní vzorky do dvou skupin, aby výsledkem byly v~nejlepším případě dvě věrohodné množiny. Pokud však byly vstupní vzorky rozloženy například tak, jak je ukázáno na obrázku~\ref{rozdeleni}, najde pocket algoritmus řešení, které je v~obrázku~\ref{rozdeleni} označeno jako $S$. Výsledkem je tedy sice rozdělení, které chybně klasifikuje pouze jediný vzorek, ale nevěrohodnou množinu nijak nerozdělí a tudíž by přidávání neuronů, učených pocket algoritmem, nevedlo k~najití věrohodných skupin. K~pocket algoritmu byla tedy přidána podmínka, že musí výsledný neuron správně klasifikovat alespoň jeden vzorek z~každé třídy, pokud takový vzorek existuje.
 
 \begin{figure}[h]
@@ -65,27 +65,27 @@ Pro hledání vah \emph{Master} neuronu bylo možné použít pocket algoritmus 
   \caption{Množina vstupních vzorků, které nejsou rozdělitelné pocket algoritmem\label{rozdeleni}}
 \end{figure}
 
-\section*{Experimentální ověření výsledných sítí}
+\section{Experimentální ověření výsledných sítí}
 Pro otestování vlastností sítí, vytvářených algoritmem Tiling, byly řešeny dva různé problémy. Množina dat se použila pro desetinásobnou stratifikovanou 10-fold křížovou validaci (dle~\cite{machinelearning}). Vstupní vzorky byly náhodně rozděleny do desíti stejně velkých skupin, přičemž v~každé bylo zastoupení třídy přibližně stejné, jako je její zastoupení v~původní množině. Následně se postupně každá tato skupina použila jako testovací množina a zbytek jako trénovací množina pro vytvoření sítě. Celý tento proces byl následně desetkrát zopakován a výsledná chyba byla spočítána jako průměr všech chyb sítě.
 
-\subsection*{Iris data set}\label{iristest}
+\subsection{Iris data set}\label{iristest}
 Množina dat o~kosatcích (v~originále \emph{Iris data set}) je v~oblasti dolování dat velice často používaná množina~\cite{iris}. Jedná se soubor 150 údajů o~délce a šířce kalichu a okvětních lístků různých kosatců spolu s~informacemi o~jejich příslušnosti ke třem různým třídám: \emph{Iris setosa}, \emph{Iris virginica} a \emph{Iris versicolor}. V~Iris data set jsou tyto tři třídy rovnoměrně zastoupeny, ke každé náleží 50 vzorků. První třída je lineárně separovatelná od zbývajících dvou, druhé dvě třídy nejsou navzájem lineárně separovatelné. Protože výsledkem algoritmu Tiling je síť, která dokáže klasifikovat pouze do dvou tříd, byla proto první, lineárně separovatelná, třída z~množiny dat oddělána. Vzniklá množina dat tedy obsahovala 100 vzorků dvou lineárně neseparovatelných tříd, každá zastoupena 50 vzorky.
 
 Desetinásobná stratifikovaná 10-fold křížová validace ukázala přibližně 94{,}5\% úspěšnost. To znamená, že pouze přibližně 5{,}5 \% vzorků z~testovací množiny bylo po natrénování klasifikováno chybně.
 
-\subsection*{Funkce sudosti počtu jedniček na vstupu}\label{sudost}
+\subsection{Funkce sudosti počtu jedniček na vstupu}\label{sudost}
 Další množinou dat, která byla použita pro hodnocení kvality výsledných sítí, byla množina všech kombinací hodnot 1 a -1 na šesti místech (čili 64 kombinací). První třída označovala takové kombinace, které obsahovaly sudý počet čísel 1. Druhá třída označovala jejich lichý počet. Jedná se o~úlohu sudosti dle původní práce, kde byl algoritmus Tiling představen~\cite{mezard}. Na rozdíl od testu, uvedeného v~původní práci, byly tyto hodnoty použity pro křížovou validaci - trénovací množina neobsahovala všechny kombinace, protože část byla vždy použita pouze pro testování.
 
 Křížová validace ukázala úspěšnost $41{,}83\overline{3}$ \%. Zajímavostí je, že pokud by klasifikátor místo výpočtu odpovídal pokaždé stejnou třídou, dosáhnutá úspěšnost by byla 50 \%. Tento výsledek však není způsoben neschopností algoritmu Tiling vytvořit síť, která by dokázala podle sudosti počtu jedniček klasifikovat. Pokud se jako vstup použije celá původní množina, je algoritmus Tiling schopen vytvořit síť s~jednou skrytou vrstvou a sedmi neurony ve skryté vrstvě, která se celou tuto množinu naučí.
 
-\section*{Popis ovládání výsledného programu}
+\section{Popis ovládání výsledného programu}
 Výsledný program byl psaný v~programovacím jazyce C++ pro operační systémy OS X a Linux. Zdrojové kódy jsou přeložitelné pomocí příkazu {\tt make}, spuštěným ve stejném adresáři, kde se zdrojové kódy nacházejí. Výsledný přeložený program je pojmenován {\tt tiling}.
 
 Pro křížovou validaci je určen datový soubor {\tt iris\_cross}. Pro~spuštění v~režimu křížové validace se program spouští jako {\tt ./tiling iris\_cross}. Na výstupu se poté postupně zobrazují znaky {\tt M} a {\tt a}. Znak {\tt M} značí přidání nového \emph{Master} neuronu, znak {\tt a} značí přidání \emph{Ancillary} neuronu. Nový řádek značí přidání nové vrstvy. Na konci každého učení algoritmus vypíše počet chyb v~klasifikaci testovací množiny. Na konci běhu vypíše program průměrnou procentuální úspěšnost a minimální a maximální počet chyb v~jedné klasifikaci testovací množiny.
 
-Pro učení z~jedné množiny dat a kontrolu z~druhé množiny dat se program spouští jako {\tt ./tiling train test}. Pro kontrolu schopnosti naučení sítě na trénovací data se může stejný datový soubor předat jako první i druhý argument. Pro vytvoření sítě pro kontrolu sudosti počtu jedniček se použije {\tt ./tiling odd odd}. Pro síť, řešící problém izolovaných rohů se program spouští jako {\tt ./tiling isolated\_corners isolated\_corners}. Pro naučení se z~jedné části Iris data set a kontrolu ze zbytku se program spouští jako {\tt ./tiling iris\_train iris\_check}.
+Pro učení z~jedné množiny dat a kontrolu z~druhé množiny dat se program spouští jako {\tt ./tiling train test}. Pro kontrolu schopnosti naučení sítě na trénovací data se může stejný datový soubor předat jako první i druhý argument. Pro vytvoření sítě pro kontrolu sudosti počtu jedniček se použije {\tt ./tiling odd odd}. Pro síť, řešící problém izolovaných rohů, se program spouští jako {\tt ./tiling isolated\_corners isolated\_corners}. Pro naučení se z~jedné části Iris data set a kontrolu ze zbytku se program spouští jako {\tt ./tiling iris\_train iris\_check}.
 
-\section*{Shrnutí výsledků a závěr}
+\section{Shrnutí výsledků a závěr}
 V~této práci byl popsán algoritmus Tiling pro vytváření neuronových sítí, potřebné úpravy učícího algoritmu pro jednotlivé neurony a dále ukázána výsledná úspěšnost tímto algoritmem vytvořených sítí na dvou různých úlohách.
 
 Výslednou podobu sítě velmi ovlivní chování pocket algoritmu. Kvůli použití náhodně inicializovaných vah a náhodnému výběru vzorku pro učení nemusí pocket algoritmus vždy najít nejlepší řešení v~daném počtu kroků. Zvýšení počtu kroků neúměrně prodlouží dobu vytváření sítě, menší počet kroků pak má občas za následek vytvoření zbytečně velké sítě. Pro problém izolovaných rohů, který je řešitelný pomocí jedné skryté vrstvy se čtyřmi neurony může algoritmus najít optimální řešení, ale občas je jeho výstupem neuronová síť se třemi skrytými vrstvami a postupně osmi, šesti a třemi neurony. Řešením tohoto problému by bylo použití jiných učících algoritmů~\cite{twovariants}.
