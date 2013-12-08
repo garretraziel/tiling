@@ -1,6 +1,7 @@
 \documentclass[a4paper, 11pt]{article}
 \usepackage[czech]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{picture}
 \author{Jan Sedlák}
 \title{Vytváření dopředné neuronové sítě pomocí algoritmu Tiling}
 \frenchspacing
@@ -11,18 +12,61 @@ Následující text se zabývá použitím algoritmu \emph{Tiling} pro vytváře
 
 U neuronových sítí s pevně danou topologií můžeme narazit na mnoho problémů. Při učení sítě algoritmem Backpropagation musíme předem vědět, kolik musí mít síť skrytých vrstev a kolik má být neuronů v každé vrstvě. Jedná se však o netriviální úlohu a její řešení má výrazný vliv na kvalitu sítě. Řešením tohoto problému je použití algoritmu pro vytváření sítě s proměnnou topologií. Tyto algoritmy začínají budovat síť od jednoho jediného neuronu a postupně přidávají neurony v téže vrstvě, případě při\-dá\-va\-jí vrstvy nové, dokud není síť schopna daný problém vyřešit. Výsledkem takovýchto algoritmů jsou díky tomu jednoduché a dostatečně malé sítě.
 
-Jedním z algoritmů pro vytváření sítě s proměnnou topologií je algoritmus Tiling~\cite{mezard}. Při vytváření sítě algoritmem Tiling vzniká dopředná neuronová síť složená z neuronů s bipolárním výstupem. První neuron v každé vrstvě je považován za tzv.~\emph{Master} neuron, který se snaží snížit počet chyb klasifikace předchozí vrstvy. Další neurony v každé vrstvě jsou tzv.~\emph{Ancillary} neurony, jejichž úkolem je rozlišit od sebe data, patřící do různých tříd, pokud je všechny dosavadní neurony v aktuální vrstvě přiřadily do stejné třídy. Algoritmus Tiling je určený pouze pro sítě klasifikujících do dvou tříd, ačkoliv existuje jeho úprava nazvaná \emph{MTiling}~\cite{mtiling} pro klasifikování do libovolného počtu tříd.
+Jedním z algoritmů pro vytváření sítě s proměnnou topologií je algoritmus Tiling~\cite{mezard}. Při vytváření sítě algoritmem Tiling vzniká dopředná neuronová síť složená z neuronů s bipolárním výstupem. První neuron v každé vrstvě je považován za tzv.\ \emph{Master} neuron, který se snaží snížit počet chyb klasifikace předchozí vrstvy. Další neurony v každé vrstvě jsou tzv.\ \emph{Ancillary} neurony, jejichž úkolem je rozlišit od sebe data, patřící do různých tříd, pokud je všechny dosavadní neurony v aktuální vrstvě přiřadily do stejné třídy. Algoritmus Tiling je určený pouze pro sítě klasifikujících do dvou tříd, ačkoliv existuje jeho úprava nazvaná \emph{MTiling}~\cite{mtiling} pro klasifikování do libovolného počtu tříd.
 
 V rámci práce byl algoritmus Tiling implementován a byla změřena úspěšnost jím vytvářených sítí na dvou různých problémech.
 
 \section*{Rozbor použitých metod}
+Síť, vytvořená algoritmem Tiling, sestává z dopředně propojených per\-cep\-tro\-nů. V původní práci~\cite{mezard} se pro učení jednotlivých přidávaných perceptronů používal pocket algoritmus, ačkoliv bylo později ukázáno, že zvolený učící algoritmus má na výslednou síť velký vliv, přičemž jednoduchý pocket algoritmus vrací spíše horší výsledky~\cite{twovariants}. Algoritmus Tiling byl implementován podle původní práce.
 
 \subsection*{Algoritmus Tiling}
+Algoritmus Tiling je založen na postupném přidávání vrstev, přičemž každá vrstva sníží počet chybně klasifikovaných vzorků nejméně o jedna~\cite{mezard}. V rámci jedné vrstvy je pak nutné zachovat tzv.\ \emph{věrohodnost} (v originále \emph{faithfulness}) všech skupin, do kterých jsou vstupní vzorky v dané vrstvě klasifikovány (nazývaný také jako \emph{prototyp}).
+
+Na počátku algoritmu vytvoříme první neuron a pomocí pocket algoritmu jej naučíme co nejlépe klasifikovat vstupní vzorky. Poté identifikujeme skupiny (tvořené různými kombinacemi výstupních hodnot neuronů v dané vrstvě), které jsou nevěrohodné - do kterých jsou klasifikovány vzorky různých tříd. Vybereme nejvhodnější nevěrohodnou skupinu (v původním textu je vybrána nejmenší skupina) a identifikujeme všechny vzorky, které jsou do této skupiny klasifikovány. Do aktuální vrstvy přidáme nový neuron a jako vstup pro pocket algoritmus použijeme všechny tyto vzorky. Kontrolu vě\-ro\-hod\-nos\-ti všech množin a přidávání pobočných neuronů provádíme tak dlouho, dokud nejsou všechny skupiny věrohodné. Poté do sítě přidáme novou vrstvu s jedním neuronem, kterým se opět budeme snažit co nejlépe klasifikovat všechny vstupní vzorky. Všechny neurony nové vrstvy jsou při\-po\-je\-ny k neuronům předchozí vrstvy. Výstup $S$ neuronu $i$ vrstvy $L$ při počtu neuronů předchozí vrstvy $N_{L-1}$ je spočítán jako:
+
+\begin{equation}
+  {S_i}^{(L)}=sgn\left(\sum_{j=0}^{N_{L-1}} w_{i,j}^{L}S_{j}^{(L-1)}\right)
+\end{equation}
+
+Algoritmus končí ve chvíli, kdy je první přidaný neuron, \emph{Master} neuron, schopen správně klasifikovat vstup, to znamená pokud je výstup z předchozí vrstvy lineárně separovatelný.
+
 \subsection*{Pocket algoritmus}
+Pocket algoritmus je variantou algoritmu pro učení TLU, který dosahuje optimálních hodnot i při učení na vstupech, které nejsou lineárně separovatelné~\cite{ranka}. Využívá k tomu tzv.\ \emph{kapsy}, ve které je uchováno řešení, které doposud dokázalo klasifikovat s co nejmenším počtem chyb.
+
+Pocket algoritmus pracuje obdobně jako původní pravidlo učení perceptronu. Vzorky pro učení vybírá z množiny náhodně. Pokud dojde ke špatné klasifikaci, algoritmus upraví váhy a také zkontroluje, zda je aktuální nastavení vah úspěšnější při klasifikaci, než váhy uložené v kapse. Pokud ano, aktualizuje obsah kapsy těmito hodnotami.
+
+Na konci algoritmu je nejlepší aproximace rozdělení uložená v kapse.
+
 \subsubsection*{Problém rozdělování tříd}
-\section*{Koncepce}
+Pro hledání vah \emph{Master} neuronu bylo možné použít pocket algoritmus v nezměněné podobě. Pro učení pobočných neuronů však bylo nutno tento algoritmus upravit. Úkolem pobočných neuronů totiž není najít nejlepší aproximaci klasifikace, ale rozdělit vstupní vzorky do dvou skupin, aby výsledkem byly v nejlepším případě dvě věrohodné množiny. Pokud však byly vstupní vzorky rozloženy například tak, jak je ukázáno na obrázku~\ref{rozdeleni}, najde pocket algoritmus řešení, které je v obrázku~\ref{rozdeleni} označeno jako $S$. Výsledkem je tedy sice rozdělení, které chybně klasifikuje pouze jediný vzorek, ale nevěrohodnou množinu nijak nerozdělí a tudíž by přidávání neuronů, učených pocket algoritmem, nevedlo k najití věrohodných skupin.
+
+\begin{figure}[h]
+  \centering
+  \setlength{\unitlength}{2cm}
+  \begin{picture}(4, 4)
+    \put(0,2){\line(1,0){4}}
+    \put(2,0){\line(0,1){4}}
+    \put(3.8,1.8){$x_1$}
+    \put(2.2,3.8){$x_2$}
+    \put(1,3){\circle*{0.2}}
+    \put(2,3){\circle*{0.2}}
+    \put(3,3){\circle*{0.2}}
+    \put(1,2){\circle*{0.2}}
+    \put(2,2){\circle{0.2}}
+    \put(3,2){\circle*{0.2}}
+    \put(1,1){\circle*{0.2}}
+    \put(2,1){\circle*{0.2}}
+    \put(3,1){\circle*{0.2}}
+    \put(0,0){\line(4,1){4}}
+    \put(3.8,0.7){$S$}
+  \end{picture}
+  \caption{Množina vstupních vzroků, které nejsou rozdělitelné pocket algoritmem\label{rozdeleni}}
+\end{figure}
+
 \section*{Experimentální ověření výsledných sítí}
+
 \section*{Popis ovládání výsledného programu}
+
 \section*{Shrnutí výsledků a závěr}
 
 \begin{thebibliography}{9}
@@ -36,5 +80,15 @@ V rámci práce byl algoritmus Tiling implementován a byla změřena úspěšno
   \emph{MTiling - A Constructive Neural Network Learning Algorithm for Multi-Category Pattern Classification}.
   Proceedings of the World Congress on Neural Networks'96,
   1996.
+\bibitem{twovariants}
+  Bertini Jr, J.R. and Nicoletti, M. and Hruschka Jr., E. R. and Ramer, A,
+  \emph{Two Variants of the Constructive Neural Network Tiling Algorithm}.
+  Sixth International Conference on Hybrid Intelligent Systems (HIS'06),
+  2006.
+\bibitem{ranka}
+  Mehrotra, K and Mohan, C. K. and Ranka, S.,
+  \emph{Elements of Artificial Neural Networks}.
+  The MIT Press,
+  1997.
 \end{thebibliography}
 \end{document}
