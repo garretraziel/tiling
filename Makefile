@@ -1,3 +1,4 @@
+CXX=g++
 CXXFLAGS=-Wall -Wextra -pedantic -g
 TARGET=tiling
 

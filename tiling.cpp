@@ -57,9 +57,7 @@ int main(int argc, char *argv[]) {
         Neuron *last_master;
         create_network(testset.tests, inputs, all_neurons, last_master);
     
-        std::cout << "\nTrain Set: " << check_network(testset.tests, inputs, last_master)
-                  << " errors out of " << testset.tests.size() << ".\n";
-        std::cout << "Test Set: " << check_network(dataset.tests, inputs, last_master)
+        std::cout << "\nTest Set: " << check_network(dataset.tests, inputs, last_master)
                   << " errors out of " << dataset.tests.size() << ".\n";
         
         NeuronVector::iterator it;
