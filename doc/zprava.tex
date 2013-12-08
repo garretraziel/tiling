@@ -1,0 +1,40 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\author{Jan Sedlák}
+\title{Vytváření dopředné neuronové sítě pomocí algoritmu Tiling}
+\frenchspacing
+\begin{document}
+\maketitle
+\section*{Úvod}
+Následující text se zabývá použitím algoritmu \emph{Tiling} pro vytváření neuronových sítí s proměnnou topologií. U tradičních neuronových sítí, které mají topologii předem pevně danou, je důležitou vlastností algoritmus pro správné nastavování vah spojů, učení. Mezi nejznámější patří například algoritmus \emph{Backpropagation}, který pro zmenšování chyby sítě používá zpětné šíření chyby.
+
+U neuronových sítí s pevně danou topologií můžeme narazit na mnoho problémů. Při učení sítě algoritmem Backpropagation musíme předem vědět, kolik musí mít síť skrytých vrstev a kolik má být neuronů v každé vrstvě. Jedná se však o netriviální úlohu a její řešení má výrazný vliv na kvalitu sítě. Řešením tohoto problému je použití algoritmu pro vytváření sítě s proměnnou topologií. Tyto algoritmy začínají budovat síť od jednoho jediného neuronu a postupně přidávají neurony v téže vrstvě, případě při\-dá\-va\-jí vrstvy nové, dokud není síť schopna daný problém vyřešit. Výsledkem takovýchto algoritmů jsou díky tomu jednoduché a dostatečně malé sítě.
+
+Jedním z algoritmů pro vytváření sítě s proměnnou topologií je algoritmus Tiling~\cite{mezard}. Při vytváření sítě algoritmem Tiling vzniká dopředná neuronová síť složená z neuronů s bipolárním výstupem. První neuron v každé vrstvě je považován za tzv.~\emph{Master} neuron, který se snaží snížit počet chyb klasifikace předchozí vrstvy. Další neurony v každé vrstvě jsou tzv.~\emph{Ancillary} neurony, jejichž úkolem je rozlišit od sebe data, patřící do různých tříd, pokud je všechny dosavadní neurony v aktuální vrstvě přiřadily do stejné třídy. Algoritmus Tiling je určený pouze pro sítě klasifikujících do dvou tříd, ačkoliv existuje jeho úprava nazvaná \emph{MTiling}~\cite{mtiling} pro klasifikování do libovolného počtu tříd.
+
+V rámci práce byl algoritmus Tiling implementován a byla změřena úspěšnost jím vytvářených sítí na dvou různých problémech.
+
+\section*{Rozbor použitých metod}
+
+\subsection*{Algoritmus Tiling}
+\subsection*{Pocket algoritmus}
+\subsubsection*{Problém rozdělování tříd}
+\section*{Koncepce}
+\section*{Experimentální ověření výsledných sítí}
+\section*{Popis ovládání výsledného programu}
+\section*{Shrnutí výsledků a závěr}
+
+\begin{thebibliography}{9}
+\bibitem{mezard}
+  Mezard, M. and Nadal, Jean-P.,
+  \emph{Learning in feedforward layered networks: The tiling algorithm}.
+  Journal of Physics A: Mathematical and General,
+  1989.
+\bibitem{mtiling}
+  Yang, J and  Parekh, R. G. and Honavar, V.,
+  \emph{MTiling - A Constructive Neural Network Learning Algorithm for Multi-Category Pattern Classification}.
+  Proceedings of the World Congress on Neural Networks'96,
+  1996.
+\end{thebibliography}
+\end{document}
