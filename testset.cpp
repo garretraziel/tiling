@@ -11,11 +11,14 @@ bool TestSet::read_testset(std::string filename) {
     std::ifstream fin(filename.c_str());
 
     if (fin.is_open()) {
+        // pro kazdy radek
         std::string line;
         while (std::getline(fin, line)) {
             std::istringstream ss(line);
+            // prvni hodnota je trida (1/-1)
             val_t type;
             ss >> type;
+            // pote nasleduji hodnoty vstupni vrstvy
             InputVector values;
             while (ss.good()) {
                 val_t value;
@@ -24,7 +27,7 @@ bool TestSet::read_testset(std::string filename) {
             }
             input_length = values.size();
             TestSetStruct testset = {values, type};
-            tests.push_back(testset);
+            tests.push_back(testset); // ulozim vzorek
         }        
     } else {
         return false;

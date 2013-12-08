@@ -7,9 +7,10 @@
 
 typedef std::vector<val_t> InputVector;
 
+// struktura po popis jednoho vzorku
 typedef struct {
-    InputVector inputs;
-    val_t type;
+    InputVector inputs; // mnozina hodnot pro jednotlive vstupy
+    val_t type; // trida vzorku
 } TestSetStruct;
 
 typedef std::vector<TestSetStruct> TestSetVector;
@@ -19,10 +20,12 @@ public:
     TestSet():input_length(0) {}
     TestSet(std::string filename);
 
+    // nacti vzorky ze souboru
     bool read_testset(std::string filename);
+    // delka vstupni vrstvy
     int input_length;
     
-    TestSetVector tests;
+    TestSetVector tests; // vektor testu
 };
 
 #endif

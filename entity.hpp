@@ -8,6 +8,8 @@ typedef double val_t;
 class Entity;
 typedef std::vector<Entity*> EntityVector;
 
+// obecna trida objektu,
+// ktery umi pouze vratit hodnotu
 class Entity {
 public:
     virtual val_t val() =0;
