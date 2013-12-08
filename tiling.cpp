@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
         error_rate rate = crossvalidate(testset.tests);
         std::cout << "Ten-times ten-fold crossvalidation showed "
-                  << 100-rate.rate << " % success rate.\nMin: " << rate.min
+                  << 100-rate.rate << "% success rate.\nMin: " << rate.min
                   << "\nMax: " << rate.max << std::endl;
     }
         
@@ -227,8 +227,8 @@ error_rate crossvalidate(TestSetVector testset) {
         for (int j = 0; j < folds; j++) {
             TestSetVector fold;
             for (int k = 0; k < testset_size/folds/2; k++) {
-                fold.push_back(first_class[j*5+k]);
-                fold.push_back(second_class[j*5+k]);
+                fold.push_back(first_class[j*testset_size/folds/2+k]);
+                fold.push_back(second_class[j*testset_size/folds/2+k]);
             }
             folds_vector.push_back(fold);
         }
@@ -258,7 +258,7 @@ error_rate crossvalidate(TestSetVector testset) {
             for (it = all_neurons.begin(); it != all_neurons.end(); it++) {
                 delete *it;
             }
-            std::cout << "Errors: " << error << "\n-\n";
+            std::cout << error << " errors out of " << dataset.size() << " samples\n-\n";
         }
     }
     rate.rate = ((double) errors)/count*100;

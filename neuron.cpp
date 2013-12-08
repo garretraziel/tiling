@@ -25,11 +25,9 @@ Neuron::Neuron(EntityVector entities):
     EntityVector::iterator it;
     for (it = entities.begin(); it != entities.end(); it++) {
         weights[*it] = ((double) rand())/RAND_MAX;
-        //weights[*it] = 1;
     }
     bias = new Constant(1);
     weights[bias] = ((double) rand())/RAND_MAX;
-    //weights[bias] = 0;
 }
 
 val_t Neuron::val() {
@@ -38,7 +36,8 @@ val_t Neuron::val() {
     for (it = weights.begin(); it != weights.end(); it++) {
         sum += it->first->val() * it->second;
     }
-    return act_func(sum);
+    tmp_val = act_func(sum);
+    return tmp_val;
 }
 
 void Neuron::change_weight(TestSetStruct sample, Inputs &inputs) {

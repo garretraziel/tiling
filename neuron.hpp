@@ -39,6 +39,7 @@ private:
     double learn_const;
     int iterations;
     Constant *bias;
+    val_t tmp_val;
 };
 
 #endif
