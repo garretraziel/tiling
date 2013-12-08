@@ -62,11 +62,11 @@ Pro hledání vah \emph{Master} neuronu bylo možné použít pocket algoritmus 
     \put(0,0){\line(4,1){4}}
     \put(3.8,0.7){$S$}
   \end{picture}
-  \caption{Množina vstupních vzroků, které nejsou rozdělitelné pocket algoritmem\label{rozdeleni}}
+  \caption{Množina vstupních vzorků, které nejsou rozdělitelné pocket algoritmem\label{rozdeleni}}
 \end{figure}
 
 \section*{Experimentální ověření výsledných sítí}
-Pro otestování vlastností sítí, vytvářených algoritmem Tiling, byly řešeny dva různé problémy. Množina dat se použila pro desetinásobnou stratifikovanou 10-fold křížovou validaci (dle~\cite{machinelearning}). Vstupní vzorky byly náhodně rozdělěny do desíti stejně velkých skupin, přičemž v~každé bylo zastoupení třídy přibližně stejné, jako je její zastoupení v~původní množině. Následně se postupně každá tato skupina použila jako testovací množina a zbytek jako trénovací množina pro vytvoření sítě. Celý tento proces byl následně desetkrát zopakován a výsledná chyba byla spočítána jako průměr všech chyb sítě.
+Pro otestování vlastností sítí, vytvářených algoritmem Tiling, byly řešeny dva různé problémy. Množina dat se použila pro desetinásobnou stratifikovanou 10-fold křížovou validaci (dle~\cite{machinelearning}). Vstupní vzorky byly náhodně rozděleny do desíti stejně velkých skupin, přičemž v~každé bylo zastoupení třídy přibližně stejné, jako je její zastoupení v~původní množině. Následně se postupně každá tato skupina použila jako testovací množina a zbytek jako trénovací množina pro vytvoření sítě. Celý tento proces byl následně desetkrát zopakován a výsledná chyba byla spočítána jako průměr všech chyb sítě.
 
 \subsection*{Iris data set}\label{iristest}
 Množina dat o~kosatcích (v~originále \emph{Iris data set}) je v~oblasti dolování dat velice často používaná množina~\cite{iris}. Jedná se soubor 150 údajů o~délce a šířce kalichu a okvětních lístků různých kosatců spolu s~informacemi o~jejich příslušnosti ke třem různým třídám: \emph{Iris setosa}, \emph{Iris virginica} a \emph{Iris versicolor}. V~Iris data set jsou tyto tři třídy rovnoměrně zastoupeny, ke každé náleží 50 vzorků. První třída je lineárně separovatelná od zbývajících dvou, druhé dvě třídy nejsou navzájem lineárně separovatelné. Protože výsledkem algoritmu Tiling je síť, která dokáže klasifikovat pouze do dvou tříd, byla proto první, lineárně separovatelná, třída z~množiny dat oddělána. Vzniklá množina dat tedy obsahovala 100 vzorků dvou lineárně neseparovatelných tříd, každá zastoupena 50 vzorky.
@@ -74,7 +74,7 @@ Množina dat o~kosatcích (v~originále \emph{Iris data set}) je v~oblasti dolov
 Desetinásobná stratifikovaná 10-fold křížová validace ukázala přibližně 94{,}5\% úspěšnost. To znamená, že pouze přibližně 5{,}5 \% vzorků z~testovací množiny bylo po natrénování klasifikováno chybně.
 
 \subsection*{Funkce sudosti počtu jedniček na vstupu}\label{sudost}
-Další množinou dat, která byla použita pro hodnocení kvality výsledných sítí, byla množina všech kombinací hodnot 1 a -1 na šesti místech (čili 64 kombinací). První třída označovala takové kombinace, které obsahovaly sudý počet čísel 1. Druhá třída označovala jejich lichý počet. Jedná se o~úlohu sudosti dle původní práce, kde byl algoritmus Tiling představen~\cite{mezard}. Narozdíl od testu, uvedeného v~původní práci, byly tyto hodnoty použity pro křížovou validaci - trénovací množina neobsahovala všechny kombinace, protože část byla vždy použita pouze pro testování.
+Další množinou dat, která byla použita pro hodnocení kvality výsledných sítí, byla množina všech kombinací hodnot 1 a -1 na šesti místech (čili 64 kombinací). První třída označovala takové kombinace, které obsahovaly sudý počet čísel 1. Druhá třída označovala jejich lichý počet. Jedná se o~úlohu sudosti dle původní práce, kde byl algoritmus Tiling představen~\cite{mezard}. Na rozdíl od testu, uvedeného v~původní práci, byly tyto hodnoty použity pro křížovou validaci - trénovací množina neobsahovala všechny kombinace, protože část byla vždy použita pouze pro testování.
 
 Křížová validace ukázala úspěšnost $41{,}83\overline{3}$ \%. Zajímavostí je, že pokud by klasifikátor místo výpočtu odpovídal pokaždé stejnou třídou, dosáhnutá úspěšnost by byla 50 \%. Tento výsledek však není způsoben neschopností algoritmu Tiling vytvořit síť, která by dokázala podle sudosti počtu jedniček klasifikovat. Pokud se jako vstup použije celá původní množina, je algoritmus Tiling schopen vytvořit síť s~jednou skrytou vrstvou a sedmi neurony ve skryté vrstvě, která se celou tuto množinu naučí.
 
